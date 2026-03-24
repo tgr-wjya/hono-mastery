@@ -27,6 +27,9 @@ jobs:
       - name: Biome CI
         run: bunx biome ci
 
+      - name: Run tests
+        run: bun test
+
       - name: Run tests with coverage
         if: github.event_name == 'push'
         run: bun run test:coverage
