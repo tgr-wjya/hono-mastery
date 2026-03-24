@@ -1,7 +1,7 @@
 {
   "name": "hono-mastery",
   "scripts": {
-    "dev": "bun --watch src/app.ts",
+    "dev": "bun --watch src/server.ts",
     "prepare": "husky",
     "biome:check": "bunx biome check --write",
     "biome:lint": "bunx biome lint",
