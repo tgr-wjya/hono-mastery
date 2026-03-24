@@ -5,13 +5,10 @@ permissions:
 
 on:
   pull_request:
-    branches:
-      - dev
-      - prod
+    branches: [dev, prod]
+
   push:
-    branches:
-      - dev
-      - prod
+    branches: [dev, prod]
 
 jobs:
   quality_check:
@@ -31,7 +28,9 @@ jobs:
         run: bunx biome ci
 
       - name: Run tests with coverage
+        if: github.event_name == 'push'
         run: bun run test:coverage
 
       - name: Upload coverage to Codecov
+        if: github.event_name == 'push'
         uses: codecov/codecov-action@v5.5.3
