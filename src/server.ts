@@ -9,6 +9,6 @@ import app from "./app";
 
 Bun.serve({
 	port: Number(Bun.env.PORT ?? 3000),
-	hostname: String(Bun.env.HOSTNAME ?? "0.0.0.0"),
+	hostname: "0.0.0.0",
 	fetch: app.fetch,
 });
