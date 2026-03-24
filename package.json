@@ -5,7 +5,8 @@
     "prepare": "husky",
     "biome:check": "bunx biome check --write",
     "biome:lint": "bunx biome lint",
-    "biome:ci": "bunx biome ci"
+    "biome:ci": "bunx biome ci",
+    "test:coverage": "bun test --coverage --coverage-reporter=lcov"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.6.1",
