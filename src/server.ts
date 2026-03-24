@@ -7,11 +7,9 @@
 
 import app from "./app";
 
-const PORT = Bun.env.PORT ?? 3000;
-const HOSTNAME = Bun.env.HOSTNAME ?? "0.0.0.0";
+const PORT = Number(Bun.env.PORT ?? 3000);
 
 Bun.serve({
 	port: PORT,
 	fetch: app.fetch,
-	hostname: HOSTNAME,
 });
