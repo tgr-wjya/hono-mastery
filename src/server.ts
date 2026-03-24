@@ -1,5 +1,5 @@
 /**
- * Entrypoint for the project
+ * Serve the Hono instance with Bun
  *
  * @author Tegar Wijaya Kusuma
  * @date 25 March 2026
@@ -7,9 +7,8 @@
 
 import app from "./app";
 
-const PORT = Number(Bun.env.PORT ?? 3000);
-
 Bun.serve({
-	port: PORT,
+	port: Number(Bun.env.PORT ?? 3000),
+	hostname: String(Bun.env.HOSTNAME ?? "0.0.0.0"),
 	fetch: app.fetch,
 });

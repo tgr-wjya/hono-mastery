@@ -8,17 +8,11 @@
 import { describe, expect, it } from "bun:test";
 import app from "../src/app";
 
-const BASE_URL = "http://localhost:3000";
-
 describe("Initial Test", () => {
 	it("Should return Hello, Hono in plain text on /root", async () => {
-		const response = await app.request(
-			new Request(`${BASE_URL}/`, {
-				method: "GET",
-			}),
-		);
+		const res = await app.request("/");
 
-		const hello = await response.text();
+		const hello = await res.text();
 		expect(hello).toBe("Hello Hono!");
 	});
 });

@@ -13,4 +13,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY src ./src
 COPY package.json bun.lock ./
 
-CMD ["bun", "src/server.ts"]
+CMD ["bun", "src/app.ts"]
