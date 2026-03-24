@@ -1,0 +1,21 @@
+{
+  "name": "hono-mastery",
+  "scripts": {
+    "dev": "bun --watch src/app.ts",
+    "prepare": "husky",
+    "biome:check": "bunx biome check --write",
+    "biome:lint": "bunx biome lint",
+    "biome:ci": "bunx biome ci"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.6.1",
+    "@hono/zod-openapi": "^1.2.3",
+    "hono": "^4.12.9",
+    "husky": "^9.1.7",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.8",
+    "@types/bun": "latest"
+  }
+}
