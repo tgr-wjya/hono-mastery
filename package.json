@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@hono/swagger-ui": "^0.6.1",
 		"@hono/zod-openapi": "^1.2.3",
+		"@upstash/redis": "^1.37.0",
 		"hono": "^4.12.9",
 		"husky": "^9.1.7",
 		"zod": "^4.3.6"

@@ -1,7 +1,7 @@
 # task-api
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tgr-wjya/hono-mastery/ci.yml)
-[![codecov](https://codecov.io/gh/tgr-wjya/hono-mastery/branch/prod/graph/badge.svg?token=uMNQ5hGc45)](https://codecov.io/gh/tgr-wjya/hono-mastery)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tgr-wjya/task-api/ci.yml)
+[![codecov](https://codecov.io/gh/tgr-wjya/task-api/branch/prod/graph/badge.svg?token=uMNQ5hGc45)](https://codecov.io/gh/tgr-wjya/task-api)
 
 ### 25 march 2026
 
@@ -60,7 +60,7 @@ check the api here: [task-api](https://hono-mastery-production.up.railway.app/)
 
   // with elysia
   .get("/", () => {
-    "Hello, World"; // will auto-converts return values
+    "Hello, Elysia!"; // will auto-converts return values
   })
   ```
 
@@ -100,7 +100,7 @@ check the api here: [task-api](https://hono-mastery-production.up.railway.app/)
 
 ## stack
 
-bun + hono + @upstash/redis
+bun + hono + WIP(@upstash/redis)
 
 ## find me
 
