@@ -3,7 +3,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/tgr-wjya/task-api/ci.yml)
 [![codecov](https://codecov.io/gh/tgr-wjya/task-api/branch/prod/graph/badge.svg?token=uMNQ5hGc45)](https://codecov.io/gh/tgr-wjya/task-api)
 
-### 25 march 2026
+### 26 March 2026
 
 > reformating my elysia task api using hono and added persistence with redis
 
@@ -25,6 +25,10 @@ i'll still be using bun, as its perfect for me.
 ## live url
 
 check the api here: [task-api](https://hono-mastery-production.up.railway.app/)
+
+## openapi docs
+
+i'm still figuring out hono, swagger ui isn't as seamless as it is in elysia. so in the meantime you can checkout [http](.http) for reference.
 
 ## endpoints
 
@@ -69,17 +73,17 @@ check the api here: [task-api](https://hono-mastery-production.up.railway.app/)
 - hooks works a bit differently in hono. everything lives under `(c)` as a (single context object). elysia give you a destructured context
 
   - ```ts
-    // with hono
-    app.post('/user', tbValidator('json', Body), (c) => {
-      const { name } = c.req.valid('json')
-      return c.json({ name })
-    })
+      // with hono
+      app.post('/user', tbValidator('json', Body), (c) => {
+        const { name } = c.req.valid('json')
+        return c.json({ name })
+      })
 
-    // with elysia
-    .get('/all', async ({ set }) => {
-        set.status = 200;
-        return await getTasks();
-    })
+      // with elysia
+      .get('/all', async ({ set }) => {
+          set.status = 200;
+          return await getTasks();
+      })
     ```
 
 - hono exposes a fetch-compatible handler, so you can call it directly in tests
