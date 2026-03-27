@@ -9,11 +9,12 @@ import { z } from "zod";
 
 export const AllErrorSchema = z.object({
 	error: z.string(),
-	timestamp: z.enum(["completed", "in-progress", "pending"]),
+	timestamp: z.string(),
 });
 
 export const WildcardErrorSchema = AllErrorSchema.extend({
 	availableEndpoints: z.array(z.string()),
+	docs: z.string(),
 });
 
 export type AllError = z.infer<typeof AllErrorSchema>;
@@ -26,3 +27,6 @@ export const availableEndpointsArray = [
 	"PATCH /tasks/:id",
 	"DELETE /tasks/:id",
 ];
+
+export const docsUrl =
+	String(Bun.env.DOCS_URL) || "https://github.com/tgr-wjya/task-api";

@@ -5,7 +5,7 @@
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { NotFoundException } from "./errors/error";
-import { availableEndpointsArray } from "./types";
+import { availableEndpointsArray, docsUrl } from "./types";
 
 const app = new Hono();
 
@@ -16,6 +16,7 @@ app.onError((err, c) => {
 	if (err instanceof NotFoundException) {
 		status = err.status;
 		extra.availableEndpoints = err.availableEndpoints;
+		extra.docs = err.docs;
 	}
 
 	return c.json(
@@ -29,11 +30,15 @@ app.onError((err, c) => {
 });
 
 app.get("/", (c) => {
-	return c.text("Hello Hono!");
+	return c.json({
+		app: "Task API",
+		author: "Tegar Wijaya Kusuma",
+		repo: "https://github.com/tgr-wjya/task-api",
+	});
 });
 
 app.all("/*", () => {
-	throw new NotFoundException(availableEndpointsArray);
+	throw new NotFoundException(availableEndpointsArray, docsUrl);
 });
 
 // Keep export here for easier testing.
