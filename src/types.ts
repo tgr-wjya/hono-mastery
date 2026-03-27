@@ -35,8 +35,8 @@ export const TaskIdSchema = z.object({
 
 export type Status = z.Infer<typeof FullTaskSchema>["status"];
 export type Task = z.Infer<typeof FullTaskSchema>;
-export type AllError = z.infer<typeof AllErrorSchema>;
-export type WildcardError = z.infer<typeof WildcardErrorSchema>;
+export type AllError = z.Infer<typeof AllErrorSchema>;
+export type WildcardError = z.Infer<typeof WildcardErrorSchema>;
 
 export const availableEndpointsArray = [
 	"GET /tasks/all",
