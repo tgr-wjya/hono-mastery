@@ -5,17 +5,45 @@
  * @date 25 March 2026
  */
 
-// import { Redis } from "@upstash/redis";
+import { fi } from "zod/v4/locales";
+import { TaskNotFound } from "../errors/error";
+import type { Task } from "../types";
 
-// const redis = Redis.fromEnv();
+export class TaskService {
+  private tasks: Task[] = [];
 
-// export class TaskService {
-// 	async fetchTask() {
-// 		if (!redis) {
-// 			console.log("Error: Please provide the Upstash Redis URL key!");
-// 		}
+  add(title: string, status = "pending" as const) {
+    const newTask = {
+      id: crypto.randomUUID(),
+      title,
+      status,
+      createdAt: new Date().toISOString(),
+    };
 
-// 	}
+    this.tasks.push(newTask);
+    return newTask;
+  }
 
-//   private tasks =
-// }
+  getAll() {
+    return this.tasks;
+  }
+
+  getById(id: string) {
+    const find = this.tasks.find((task) => task.id === id);
+    if (!find) {
+      throw new TaskNotFound();
+    }
+
+    return find;
+  }
+
+  remove(id: string) {
+    const remove = this.tasks.findIndex((task) => task.id === id);
+    if (remove === -1) {
+      throw new TaskNotFound();
+    }
+    this.tasks.splice(remove, 1);
+
+    return true;
+  }
+}
