@@ -5,14 +5,13 @@
  * @date 25 March 2026
  */
 
-import { fi } from "zod/v4/locales";
 import { TaskNotFound } from "../errors/error";
-import type { Task } from "../types";
+import type { Status, Task } from "../types";
 
 export class TaskService {
 	private tasks: Task[] = [];
 
-	add(title: string, status = "pending" as const) {
+	add(title: string, status?: Status) {
 		const newTask = {
 			id: crypto.randomUUID(),
 			title,

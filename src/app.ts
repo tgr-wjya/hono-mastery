@@ -4,7 +4,7 @@
 
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { NotFoundException } from "./errors/error";
+import { NotFoundException, TaskNotFound } from "./errors/error";
 import { TaskRoutes } from "./routes/tasks";
 import { availableEndpointsArray, docsUrl } from "./types";
 
@@ -18,6 +18,8 @@ app.onError((err, c) => {
 		status = err.status;
 		extra.availableEndpoints = err.availableEndpoints;
 		extra.docs = err.docs;
+	} else if (err instanceof TaskNotFound) {
+		status = err.status;
 	}
 
 	return c.json(

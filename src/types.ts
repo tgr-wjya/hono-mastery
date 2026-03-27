@@ -33,6 +33,7 @@ export const TaskIdSchema = z.object({
 	id: z.string().min(1),
 });
 
+export type Status = z.Infer<typeof FullTaskSchema>["status"];
 export type Task = z.Infer<typeof FullTaskSchema>;
 export type AllError = z.infer<typeof AllErrorSchema>;
 export type WildcardError = z.infer<typeof WildcardErrorSchema>;

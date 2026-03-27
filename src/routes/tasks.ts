@@ -25,9 +25,10 @@ export function TaskRoutes(service = new TaskService()) {
 	});
 
 	taskRouter.post("/", zValidator("json", CreateTaskSchema), async (c) => {
-		const { title, status } = c.req.valid("json");
+		const body = c.req.valid("json");
+		CreateTaskSchema.safeParse(body);
 
-		return c.json(service.add(title, status), 201);
+		return c.json(service.add(body.title, body.status), 201);
 	});
 
 	taskRouter.delete("/:id", zValidator("param", TaskIdSchema), (c) => {
