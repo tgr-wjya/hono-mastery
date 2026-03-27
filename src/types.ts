@@ -33,6 +33,15 @@ export const TaskIdSchema = z.object({
 	id: z.string().min(1),
 });
 
+export const ZodErrorSchema = z.object({
+	success: z.boolean(),
+	error: z.object({
+		name: z.string(),
+		message: z.string(),
+	}),
+});
+
+export type ZodError = z.Infer<typeof ZodErrorSchema>;
 export type Status = z.Infer<typeof FullTaskSchema>["status"];
 export type Task = z.Infer<typeof FullTaskSchema>;
 export type AllError = z.Infer<typeof AllErrorSchema>;

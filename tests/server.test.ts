@@ -7,11 +7,14 @@
 
 import { beforeEach, describe, expect, it } from "bun:test";
 import { Hono } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { ZodError } from "zod";
 import app from "../src/app";
-import { TaskNotFound } from "../src/errors/error";
+import { NotFoundException, TaskNotFound } from "../src/errors/error";
 import { TaskRoutes } from "../src/routes/tasks";
 import { TaskService } from "../src/services/task.service";
 import {
+	type AllError,
 	availableEndpointsArray,
 	docsUrl,
 	type Task,
@@ -21,9 +24,42 @@ import {
 let testApp: Hono;
 let service: TaskService;
 
-it("Should return app, author and repo field on /root", async () => {
-	const res = await app.request("/");
+function setupTestApp() {
+	service = new TaskService();
+	testApp = new Hono();
+	testApp.route("/tasks", TaskRoutes(service));
+	testApp.onError((err, c) => {
+		const extra: Record<string, unknown> = {};
+		let status = 500;
 
+		if (err instanceof NotFoundException) {
+			status = err.status;
+			extra.availableEndpoints = err.availableEndpoints;
+			extra.docs = err.docs;
+		} else if (err instanceof TaskNotFound) {
+			status = err.status;
+		} else if (err instanceof ZodError) {
+			status = 400;
+		}
+
+		return c.json(
+			{
+				error:
+					err instanceof ZodError
+						? err.issues
+						: err instanceof Error
+							? err.message
+							: "Unknown Error",
+				timestamp: new Date().toISOString(),
+				...extra,
+			},
+			status as ContentfulStatusCode,
+		);
+	});
+}
+
+it("GET / — returns app metadata", async () => {
+	const res = await app.request("/");
 	const hello = await res.json();
 	expect(hello).toEqual({
 		app: "Task API",
@@ -32,16 +68,14 @@ it("Should return app, author and repo field on /root", async () => {
 	});
 });
 
-describe("ALL wildcards", () => {
+describe("Wildcard routes", () => {
 	it.each([
 		"/1",
 		"/tasksss",
 		"/taz",
 		"whatever/here",
-	])("Returns 404 with wildcard fields on %s", async (url) => {
-		const res = await app.request(url, {
-			method: "GET",
-		});
+	])("GET %s — returns 404 with wildcard error shape", async (url) => {
+		const res = await app.request(url, { method: "GET" });
 
 		expect(res.status).toBe(404);
 		const body = (await res.json()) as WildcardError;
@@ -58,13 +92,9 @@ describe("ALL wildcards", () => {
 });
 
 describe("GET /tasks/all", () => {
-	beforeEach(() => {
-		service = new TaskService();
-		testApp = new Hono();
-		testApp.route("/tasks", TaskRoutes(service));
-	});
+	beforeEach(setupTestApp);
 
-	it("should return empty array when no tasks exist", async () => {
+	it("returns an empty array when no tasks exist", async () => {
 		const res = await testApp.request("/tasks/all");
 
 		expect(res.status).toBe(200);
@@ -73,7 +103,7 @@ describe("GET /tasks/all", () => {
 		expect(body).toHaveLength(0);
 	});
 
-	it("Should return all tasks with the correct shape (id, title, status, createdAt) field and 200 status code as response", async () => {
+	it("returns all tasks with correct shape (id, title, status, createdAt)", async () => {
 		service.add("Test 1", "completed");
 		service.add("Test 2", "completed");
 
@@ -92,7 +122,7 @@ describe("GET /tasks/all", () => {
 		expect(added[1]).toHaveProperty("createdAt");
 	});
 
-	it("Should preserve insertion order and return the correct order on array", async () => {
+	it("preserves insertion order", async () => {
 		service.add("First", "completed");
 		service.add("Second", "completed");
 		service.add("Third", "completed");
@@ -108,33 +138,9 @@ describe("GET /tasks/all", () => {
 });
 
 describe("GET /tasks/:id", () => {
-	beforeEach(() => {
-		service = new TaskService();
-		testApp = new Hono();
-		testApp.route("/tasks", TaskRoutes(service));
+	beforeEach(setupTestApp);
 
-		testApp.onError((err, c) => {
-			if (err instanceof TaskNotFound) {
-				return c.json(
-					{
-						error: err instanceof Error ? err.message : "Unknown Error",
-						timestamp: new Date().toISOString(),
-					},
-					404,
-				);
-			}
-
-			return c.json(
-				{
-					error: err instanceof Error ? err.message : "Unknown Error",
-					timestamp: new Date().toISOString(),
-				},
-				500,
-			);
-		});
-	});
-
-	it("Should return a single task with the correct ID with 200 status code", async () => {
+	it("returns a single task by ID with correct shape", async () => {
 		const added = service.add("Test Task", "completed");
 
 		const res = await testApp.request(`/tasks/${added.id}`);
@@ -148,7 +154,7 @@ describe("GET /tasks/:id", () => {
 		expect(created).toBeObject();
 	});
 
-	it("Getting a task with a malformed/invalid UUID returns the appropriate error", async () => {
+	it("returns 404 for a malformed/invalid UUID", async () => {
 		const res = await testApp.request("/tasks/12b12b");
 
 		expect(res.status).toBe(404);
@@ -158,34 +164,59 @@ describe("GET /tasks/:id", () => {
 	});
 });
 
-describe("DELETE /tasks/:id", () => {
-	beforeEach(() => {
-		service = new TaskService();
-		testApp = new Hono();
-		testApp.route("/tasks", TaskRoutes(service));
+describe("POST /tasks", () => {
+	beforeEach(setupTestApp);
 
-		testApp.onError((err, c) => {
-			if (err instanceof TaskNotFound) {
-				return c.json(
-					{
-						error: err instanceof Error ? err.message : "Unknown Error",
-						timestamp: new Date().toISOString(),
-					},
-					404,
-				);
-			}
-
-			return c.json(
-				{
-					error: err instanceof Error ? err.message : "Unknown Error",
-					timestamp: new Date().toISOString(),
-				},
-				500,
-			);
+	it("creates a task with valid body and returns 201", async () => {
+		const res = await testApp.request("/tasks", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				title: "Take out the trash",
+				status: "completed",
+			}),
 		});
+
+		expect(res.status).toBe(201);
+		const created = await res.json();
+		expect(created).toHaveProperty("id");
+		expect(created).toHaveProperty("title", "Take out the trash");
+		expect(created).toHaveProperty("status", "completed");
+		expect(created).toHaveProperty("createdAt");
 	});
 
-	it("Should be able to delete a task with the correct ID and return 200 as response", async () => {
+	it("returns 500 when no body is provided", async () => {
+		const res = await testApp.request("/tasks", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+		});
+
+		expect(res.status).toBe(500);
+		const rejected = (await res.json()) as AllError;
+		expect(rejected.error).toBe("Malformed JSON in request body");
+		expect(rejected).toHaveProperty("timestamp");
+	});
+
+	it("returns 400 from Zod when body is an empty object", async () => {
+		const res = await testApp.request("/tasks", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({}),
+		});
+
+		expect(res.status).toBe(400);
+		const rejected = (await res.json()) as { success: boolean; error: unknown };
+		expect(rejected.success).toBe(false);
+		expect(rejected.error).toBeObject();
+		expect(rejected.error).toHaveProperty("name", "ZodError");
+		expect(rejected.error).toHaveProperty("message");
+	});
+});
+
+describe("DELETE /tasks/:id", () => {
+	beforeEach(setupTestApp);
+
+	it("deletes a task by ID and returns true", async () => {
 		const toDelete = service.add("Task To Delete", "pending");
 
 		const res = await testApp.request(`/tasks/${toDelete.id}`, {
@@ -193,22 +224,19 @@ describe("DELETE /tasks/:id", () => {
 		});
 
 		expect(res.status).toBe(200);
-		const deleted = await res.json();
-		expect(deleted).toBe(true);
+		expect(await res.json()).toBe(true);
 	});
 
-	it("Deleted tasks no longer appears", async () => {
+	it("deleted task no longer appears in GET /tasks/all", async () => {
 		const toDelete = service.add("Task To Delete", "pending");
 		const shouldRemain = service.add("Task To Delete 2", "pending");
 
 		const deleted = await testApp.request(`/tasks/${toDelete.id}`, {
 			method: "DELETE",
 		});
-
 		expect(deleted.status).toBe(200);
 
 		const get = await testApp.request("/tasks/all");
-
 		expect(get.status).toBe(200);
 		const all = (await get.json()) as Task[];
 		expect(all[0]).toHaveProperty("id", shouldRemain.id);
@@ -217,10 +245,8 @@ describe("DELETE /tasks/:id", () => {
 		expect(all[0]).toHaveProperty("createdAt");
 	});
 
-	it("Deleting a non-existent task returns 404", async () => {
-		const res = await testApp.request("/tasks/12b12b", {
-			method: "DELETE",
-		});
+	it("returns 404 when deleting a non-existent task", async () => {
+		const res = await testApp.request("/tasks/12b12b", { method: "DELETE" });
 
 		expect(res.status).toBe(404);
 		const body = await res.json();
@@ -228,21 +254,19 @@ describe("DELETE /tasks/:id", () => {
 		expect(body).toHaveProperty("timestamp");
 	});
 
-	it("Deleting the same task twice returns 404 on the second attempt", async () => {
+	it("returns 404 on the second delete attempt for the same task", async () => {
 		const toDelete = service.add("Task To Delete", "pending");
 
-		const firstAttempt = await testApp.request(`/tasks/${toDelete.id}`, {
+		const first = await testApp.request(`/tasks/${toDelete.id}`, {
 			method: "DELETE",
 		});
+		expect(first.status).toBe(200);
 
-		expect(firstAttempt.status).toBe(200);
-
-		const secondAttempt = await testApp.request(`/tasks/${toDelete.id}`, {
+		const second = await testApp.request(`/tasks/${toDelete.id}`, {
 			method: "DELETE",
 		});
-
-		expect(secondAttempt.status).toBe(404);
-		const body = await secondAttempt.json();
+		expect(second.status).toBe(404);
+		const body = await second.json();
 		expect(body).toHaveProperty("error", "Task Not Found");
 		expect(body).toHaveProperty("timestamp");
 	});
