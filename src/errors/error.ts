@@ -2,7 +2,7 @@
  * Custom class error
  *
  * @author Tegar Wijaya Kusuma
- * @date 25 March 2026
+ * @date 28 March 2026
  */
 
 export class NotFoundException extends Error {

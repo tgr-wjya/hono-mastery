@@ -2,7 +2,7 @@
  * Typecheck and other const
  *
  * @author Tegar Wijaya Kusuma
- * @date 25 March 2026
+ * @date 28 March 2026
  */
 
 import { z } from "zod";
@@ -31,6 +31,11 @@ export const CreateTaskSchema = z.object({
 
 export const TaskIdSchema = z.object({
 	id: z.string().min(1),
+});
+
+export const UpdateTaskSchema = z.object({
+	title: z.string().min(4).optional(),
+	status: z.enum(["completed", "pending", "in-progress"]).optional(),
 });
 
 export const ZodErrorSchema = z.object({

@@ -2,7 +2,7 @@
  * Test runner for Hono
  *
  * @author Tegar Wijaya Kusuma
- * @date 25 March 2026
+ * @date 28 March 2026
  */
 
 import { beforeEach, describe, expect, it } from "bun:test";
@@ -210,6 +210,68 @@ describe("POST /tasks", () => {
 		expect(rejected.error).toBeObject();
 		expect(rejected.error).toHaveProperty("name", "ZodError");
 		expect(rejected.error).toHaveProperty("message");
+	});
+});
+
+describe("PATCH /tasks/:id", () => {
+	beforeEach(setupTestApp);
+
+	it("Should be able to update only the title field succesfully and return 200", async () => {
+		const added = service.add("Test Task", "completed");
+
+		const res = await testApp.request(`/tasks/${added.id}`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				title: "Updated Task Title",
+			}),
+		});
+
+		expect(res.status).toBe(200);
+		const updated = (await res.json()) as Task;
+		expect(updated.id).toBe(added.id);
+		expect(updated.title).toBe("Updated Task Title");
+		expect(updated.status).toBe("completed");
+		expect(updated.createdAt).toBe(added.createdAt);
+	});
+
+	it("Should be able to update task with only the status field succesfully and return 200", async () => {
+		const added = service.add("Test Task", "pending");
+
+		const res = await testApp.request(`/tasks/${added.id}`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				status: "completed",
+			}),
+		});
+
+		expect(res.status).toBe(200);
+		const updated = (await res.json()) as Task;
+		expect(updated.id).toBe(added.id);
+		expect(updated.title).toBe("Test Task");
+		expect(updated.status).toBe("completed");
+		expect(updated.createdAt).toBe(added.createdAt);
+	});
+
+	it("Should be able to succesfully update task with both field specified and return 200", async () => {
+		const added = service.add("Test Task", "pending");
+
+		const res = await testApp.request(`/tasks/${added.id}`, {
+			method: "PATCH",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				title: "Mop The Floor",
+				status: "in-progress",
+			}),
+		});
+
+		expect(res.status).toBe(200);
+		const updated = (await res.json()) as Task;
+		expect(updated.id).toBe(added.id);
+		expect(updated.title).toBe("Mop The Floor");
+		expect(updated.status).toBe("in-progress");
+		expect(updated.createdAt).toBe(added.createdAt);
 	});
 });
 

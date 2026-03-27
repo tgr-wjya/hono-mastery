@@ -2,7 +2,7 @@
  * Serve the Hono instance with Bun
  *
  * @author Tegar Wijaya Kusuma
- * @date 25 March 2026
+ * @date 28 March 2026
  */
 
 import app from "./app";
