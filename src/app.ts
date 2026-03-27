@@ -8,12 +8,13 @@ import { ZodError } from "zod";
 import { NotFoundException, TaskNotFound } from "./errors/error";
 import { TaskRoutes } from "./routes/tasks";
 import { availableEndpointsArray, docsUrl } from "./types";
+import { TaskRoutes } from "./routes/tasks";
 
 const app = new Hono();
 
 app.onError((err, c) => {
-	const extra: Record<string, unknown> = {};
-	let status = 500;
+  const extra: Record<string, unknown> = {};
+  let status = 500;
 
 	if (err instanceof NotFoundException) {
 		status = err.status;
@@ -41,17 +42,17 @@ app.onError((err, c) => {
 });
 
 app.get("/", (c) => {
-	return c.json({
-		app: "Task API",
-		author: "Tegar Wijaya Kusuma",
-		repo: "https://github.com/tgr-wjya/task-api",
-	});
+  return c.json({
+    app: "Task API",
+    author: "Tegar Wijaya Kusuma",
+    repo: "https://github.com/tgr-wjya/task-api",
+  });
 });
 
 app.route("/tasks", TaskRoutes());
 
 app.all("/*", () => {
-	throw new NotFoundException(availableEndpointsArray, docsUrl);
+  throw new NotFoundException(availableEndpointsArray, docsUrl);
 });
 
 // Keep export here for easier testing.

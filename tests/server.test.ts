@@ -77,18 +77,19 @@ describe("Wildcard routes", () => {
 	])("GET %s — returns 404 with wildcard error shape", async (url) => {
 		const res = await app.request(url, { method: "GET" });
 
-		expect(res.status).toBe(404);
-		const body = (await res.json()) as WildcardError;
-		expect(body).toHaveProperty(
-			"error",
-			"Not Found. Please Refer To The Documentation Below For More Information",
-		);
-		expect(body).toHaveProperty("timestamp");
-		expect(body).toHaveProperty("docs");
-		expect(body.availableEndpoints).toEqual(availableEndpointsArray);
-		expect(body.docs).toBe(docsUrl);
-		expect(body.availableEndpoints).toBeArray();
-	});
+      expect(res.status).toBe(404);
+      const body = (await res.json()) as WildcardError;
+      expect(body).toHaveProperty(
+        "error",
+        "Not Found. Please Refer To The Documentation Below For More Information",
+      );
+      expect(body).toHaveProperty("timestamp");
+      expect(body).toHaveProperty("docs");
+      expect(body.availableEndpoints).toEqual(availableEndpointsArray);
+      expect(body.docs).toBe(docsUrl);
+      expect(body.availableEndpoints).toBeArray();
+    },
+  );
 });
 
 describe("GET /tasks/all", () => {
