@@ -4,6 +4,7 @@
 
 import { Hono } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { ZodError } from "zod";
 import { NotFoundException, TaskNotFound } from "./errors/error";
 import { TaskRoutes } from "./routes/tasks";
 import { availableEndpointsArray, docsUrl } from "./types";
@@ -20,11 +21,18 @@ app.onError((err, c) => {
 		extra.docs = err.docs;
 	} else if (err instanceof TaskNotFound) {
 		status = err.status;
+	} else if (err instanceof ZodError) {
+		status = 400;
 	}
 
 	return c.json(
 		{
-			error: err instanceof Error ? err.message : "Unknown Error",
+			error:
+				err instanceof ZodError
+					? err.issues
+					: err instanceof Error
+						? err.message
+						: "Unknown Error",
 			timestamp: new Date().toISOString(),
 			...extra,
 		},

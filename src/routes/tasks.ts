@@ -2,13 +2,13 @@
  * Task API Routes
  *
  * @author Tegar Wijaya Kusuma
- * @date 27 March 2026
+ * @date 29 March 2026
  */
 
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { TaskService } from "../services/task.service";
-import { CreateTaskSchema, TaskIdSchema } from "../types";
+import { CreateTaskSchema, TaskIdSchema, UpdateTaskSchema } from "../types";
 
 export function TaskRoutes(service = new TaskService()) {
 	const taskRouter = new Hono();
@@ -30,6 +30,21 @@ export function TaskRoutes(service = new TaskService()) {
 
 		return c.json(service.add(body.title, body.status), 201);
 	});
+
+	taskRouter.patch(
+		"/:id",
+		zValidator("param", TaskIdSchema),
+		zValidator("json", UpdateTaskSchema),
+		async (c) => {
+			const { id } = c.req.valid("param");
+			TaskIdSchema.safeParse(id);
+
+			const { title, status } = c.req.valid("json");
+			UpdateTaskSchema.safeParse({ title, status });
+
+			return c.json(await service.update(id, title, status), 200);
+		},
+	);
 
 	taskRouter.delete("/:id", zValidator("param", TaskIdSchema), (c) => {
 		const { id } = c.req.valid("param");
