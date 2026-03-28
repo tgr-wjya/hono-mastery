@@ -26,11 +26,3 @@ export class TaskNotFound extends Error {
 		super("Task Not Found");
 	}
 }
-
-export class TaskNotFound extends Error {
-	status = 404;
-
-	constructor() {
-		super("Task Not Found");
-	}
-}

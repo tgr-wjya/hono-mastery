@@ -8,8 +8,6 @@ import { ZodError } from "zod";
 import { NotFoundException, TaskNotFound } from "./errors/error";
 import { TaskRoutes } from "./routes/tasks";
 import { availableEndpointsArray, docsUrl } from "./types";
-import { TaskRoutes } from "./routes/tasks";
-import { availableEndpointsArray, docsUrl } from "./types";
 
 const app = new Hono();
 
